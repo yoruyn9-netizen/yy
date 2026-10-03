@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny all documents
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSystemOwner() {
+      return isSignedIn() && request.auth.token.email == 'jullyan382@gmail.com';
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && (request.auth.uid == userId || isSystemOwner());
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    // User profiles & subcollections
+    match /users/{userId} {
+      allow read, write: if isSignedIn();
+      allow list: if isSystemOwner();
+
+      // AI Usage history
+      match /usage_history/{historyId} {
+        allow read, list, create: if isSignedIn();
+        allow update, delete: if isSystemOwner();
+      }
+
+      // Permanent Chat Sessions subcollection
+      match /sessions/{sessionId} {
+        allow read, write, list, delete: if isSignedIn();
+      }
+    }
+
+    // Chat sessions (top-level collection)
+    match /sessions/{sessionId} {
+      allow read, write, list, delete: if isSignedIn();
+    }
+
+    // Project snapshots
+    match /projects/{projectId} {
+      allow read, write, list, delete: if isSignedIn();
+    }
+
+    // Broadcast notifications / announcements sent by Owner to all users
+    match /broadcast_notifications/{notificationId} {
+      allow read, list: if isSignedIn();
+      allow create, update, delete: if isSystemOwner();
+    }
+  }
+}

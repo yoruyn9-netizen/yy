@@ -1,0 +1,189 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile authenticated with Google",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "displayName": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "avatarUrl": {
+          "type": "string",
+          "maxLength": 1024
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      },
+      "required": ["userId", "email"]
+    },
+    "ChatSession": {
+      "title": "ChatSession",
+      "description": "AI studio vibe coding conversation session",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "createdAt": {
+          "type": "number"
+        },
+        "updatedAt": {
+          "type": "number"
+        },
+        "systemInstruction": {
+          "type": "string",
+          "maxLength": 4000
+        }
+      },
+      "required": ["id", "userId", "title"]
+    },
+    "ProjectSnapshot": {
+      "title": "ProjectSnapshot",
+      "description": "Saved project state and modular files",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "sessionId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "files": {
+          "type": "object"
+        },
+        "updatedAt": {
+          "type": "number"
+        }
+      },
+      "required": ["id", "userId", "files"]
+    },
+    "BroadcastNotification": {
+      "title": "BroadcastNotification",
+      "description": "System notifications broadcasted by owner to all users",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "type": {
+          "type": "string",
+          "enum": ["info", "update", "warning", "urgent"]
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "active": {
+          "type": "boolean"
+        }
+      },
+      "required": ["id", "title", "message"]
+    },
+    "UsageHistoryItem": {
+      "title": "UsageHistoryItem",
+      "description": "User AI usage history record inspected by owner",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "prompt": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "model": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "timestamp": {
+          "type": "number"
+        }
+      },
+      "required": ["id", "userId", "prompt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "UserProfile"
+      },
+      "description": "User profiles with block status managed by owner"
+    },
+    "/users/{userId}/usage_history/{historyId}": {
+      "schema": {
+        "$ref": "UsageHistoryItem"
+      },
+      "description": "AI usage history records visible to owner"
+    },
+    "/users/{userId}/sessions/{sessionId}": {
+      "schema": {
+        "$ref": "ChatSession"
+      },
+      "description": "User persistent chat sessions subcollection"
+    },
+    "/sessions/{sessionId}": {
+      "schema": {
+        "$ref": "ChatSession"
+      },
+      "description": "Chat sessions owned by the authenticated user"
+    },
+    "/projects/{projectId}": {
+      "schema": {
+        "$ref": "ProjectSnapshot"
+      },
+      "description": "Saved project snapshots owned by the authenticated user"
+    },
+    "/broadcast_notifications/{notificationId}": {
+      "schema": {
+        "$ref": "BroadcastNotification"
+      },
+      "description": "Global announcements sent by owner to all users"
+    }
+  }
+}
